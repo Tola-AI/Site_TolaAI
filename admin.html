@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Admin — tola.video</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0d0d0d;color:#eee;min-height:100vh}
+input,textarea,select{font-family:inherit}
+a{color:inherit}
+
+/* ---- AUTH OVERLAY ---- */
+#auth-overlay{position:fixed;inset:0;background:#0d0d0d;display:flex;align-items:center;justify-content:center;z-index:100}
+.auth-box{background:#1a1a1a;border:1px solid #333;border-radius:16px;padding:40px;width:460px;max-width:90vw;text-align:center}
+.auth-box h1{font-size:24px;font-weight:800;margin-bottom:8px}
+.auth-box .sub{color:#888;font-size:14px;margin-bottom:32px;line-height:1.5}
+.auth-box label{display:block;text-align:left;font-size:11px;font-weight:700;color:#888;letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px}
+.auth-box input{width:100%;height:48px;background:#111;border:1px solid #333;border-radius:8px;color:#fff;padding:0 16px;font-size:15px;margin-bottom:20px;transition:border-color .2s}
+.auth-box input:focus{outline:none;border-color:#5E97EC}
+.auth-box .hint{font-size:12px;color:#666;margin-bottom:24px;text-align:left;line-height:1.5}
+.auth-box .hint a{color:#5E97EC;text-decoration:none}
+
+/* ---- LAYOUT ---- */
+#app{display:none;flex-direction:column;min-height:100vh}
+.topbar{background:#1a1a1a;border-bottom:1px solid #222;height:60px;display:flex;align-items:center;justify-content:space-between;padding:0 24px;position:sticky;top:0;z-index:50}
+.topbar .logo{font-weight:800;font-size:17px}
+.topbar .logo em{font-style:normal;color:#5E97EC}
+.topbar-right{display:flex;align-items:center;gap:12px}
+
+.main{display:grid;grid-template-columns:220px 1fr;flex:1}
+.sidebar{background:#141414;border-right:1px solid #222;padding:20px 0;position:sticky;top:60px;height:calc(100vh - 60px);overflow-y:auto}
+.sidebar a{display:flex;align-items:center;gap:10px;padding:11px 20px;font-size:13px;font-weight:600;color:#aaa;text-decoration:none;border-radius:0;transition:all .15s;border-left:3px solid transparent}
+.sidebar a:hover{color:#fff;background:rgba(255,255,255,.04)}
+.sidebar a.active{color:#5E97EC;background:rgba(94,151,236,.08);border-left-color:#5E97EC}
+.sidebar .sec-label{padding:14px 20px 6px;font-size:10px;font-weight:700;color:#555;letter-spacing:.12em;text-transform:uppercase}
+
+.content{padding:32px;overflow-y:auto}
+.page{display:none}
+.page.active{display:block}
+.page-header{margin-bottom:28px}
+.page-header h2{font-size:22px;font-weight:800;margin-bottom:6px}
+.page-header p{color:#888;font-size:14px}
+
+/* ---- CARDS ---- */
+.card{background:#1a1a1a;border:1px solid #2a2a2a;border-radius:14px;padding:24px;margin-bottom:20px}
+.card-title{font-size:13px;font-weight:700;color:#888;letter-spacing:.08em;text-transform:uppercase;margin-bottom:18px;display:flex;align-items:center;gap:8px}
+.card-title .dot{width:8px;height:8px;border-radius:50%;background:linear-gradient(135deg,#5E97EC,#1924EC)}
+
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+
+.field{margin-bottom:16px}
+.field:last-child{margin-bottom:0}
+.field label{display:block;font-size:11px;font-weight:700;color:#888;letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px}
+.field input,.field textarea{width:100%;background:#111;border:1px solid #2a2a2a;border-radius:8px;color:#fff;padding:0 14px;font-size:14px;height:44px;transition:border-color .2s}
+.field textarea{height:90px;padding:12px 14px;resize:vertical;line-height:1.5}
+.field input:focus,.field textarea:focus{outline:none;border-color:#5E97EC;box-shadow:0 0 0 3px rgba(94,151,236,.12)}
+.field .hint{font-size:11px;color:#666;margin-top:6px}
+.field .preview{font-size:12px;color:#5E97EC;margin-top:6px;background:rgba(94,151,236,.06);border:1px solid rgba(94,151,236,.2);border-radius:6px;padding:8px 12px;line-height:1.5}
+
+.svc-block{border:1px solid #2a2a2a;border-radius:10px;padding:18px;margin-bottom:12px;background:#111}
+.svc-block h4{font-size:13px;font-weight:700;color:#aaa;margin-bottom:14px}
+
+/* ---- BUTTONS ---- */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:42px;padding:0 20px;border-radius:8px;font-weight:700;font-size:13px;cursor:pointer;transition:all .2s;border:0}
+.btn-primary{background:linear-gradient(135deg,#5E97EC,#1924EC);color:#fff;box-shadow:0 4px 16px rgba(25,36,236,.3)}
+.btn-primary:hover{filter:brightness(1.1);transform:translateY(-1px)}
+.btn-primary:disabled{opacity:.5;transform:none;cursor:not-allowed}
+.btn-ghost{background:transparent;color:#aaa;border:1px solid #333}
+.btn-ghost:hover{color:#fff;border-color:#555}
+.btn-danger{background:transparent;color:#f87171;border:1px solid #3a2020}
+.btn-danger:hover{background:#1a0808;border-color:#f87171}
+.btn-sm{height:34px;padding:0 14px;font-size:12px}
+
+/* ---- STATUS ---- */
+#status-bar{position:fixed;bottom:24px;right:24px;z-index:200;display:flex;flex-direction:column;gap:8px;pointer-events:none}
+.toast{background:#1a1a1a;border:1px solid #333;border-radius:10px;padding:12px 18px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:10px;animation:slideIn .3s ease;max-width:380px}
+.toast.success{border-color:rgba(74,222,128,.4);color:#4ade80}
+.toast.error{border-color:rgba(248,113,113,.4);color:#f87171}
+.toast.loading{border-color:rgba(94,151,236,.4);color:#5E97EC}
+@keyframes slideIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+
+/* ---- SPINNER ---- */
+.spin{width:16px;height:16px;border:2px solid rgba(255,255,255,.2);border-top-color:currentColor;border-radius:50%;animation:spin .6s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ---- LOAD OVERLAY ---- */
+#load-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);display:none;align-items:center;justify-content:center;z-index:150;flex-direction:column;gap:16px}
+#load-overlay .spin{width:32px;height:32px;border-width:3px;color:#5E97EC}
+#load-overlay p{color:#aaa;font-size:14px}
+
+/* ---- MISC ---- */
+hr.sep{border:0;border-top:1px solid #222;margin:20px 0}
+.footer-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:24px;padding-top:20px;border-top:1px solid #222}
+.badge{display:inline-flex;align-items:center;height:22px;padding:0 8px;border-radius:100px;font-size:11px;font-weight:700;background:rgba(94,151,236,.12);color:#5E97EC;border:1px solid rgba(94,151,236,.25)}
+.unsaved-dot{width:8px;height:8px;border-radius:50%;background:#f87171;display:inline-block;margin-left:6px;opacity:0}
+.unsaved-dot.on{opacity:1}
+</style>
+</head>
+<body>
+
+<!-- AUTH -->
+<div id="auth-overlay">
+  <div class="auth-box">
+    <h1>🔐 Admin Panel</h1>
+    <p class="sub">tola.video — панель управления контентом сайта</p>
+    <label>GitHub Personal Access Token</label>
+    <input type="password" id="token-input" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" autocomplete="off">
+    <div class="hint">
+      Создай токен: <a href="https://github.com/settings/tokens" target="_blank">github.com/settings/tokens</a><br>
+      Выбери разрешение <b>repo</b> → Generate token.<br>
+      Токен хранится только в памяти сессии.
+    </div>
+    <button class="btn btn-primary" style="width:100%" onclick="authenticate()">Войти в панель</button>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div id="app">
+  <div class="topbar">
+    <div class="logo">tola<em>.video</em> <span class="badge">Admin</span></div>
+    <div class="topbar-right">
+      <a href="https://tola-ai.github.io/Site_TolaAI/" target="_blank" class="btn btn-ghost btn-sm">Открыть сайт ↗</a>
+      <button class="btn btn-ghost btn-sm" onclick="loadSite()">🔄 Обновить</button>
+      <button class="btn btn-danger btn-sm" onclick="logout()">Выйти</button>
+    </div>
+  </div>
+
+  <div class="main">
+    <nav class="sidebar">
+      <div class="sec-label">Контент</div>
+      <a href="#" class="active" onclick="nav('hero')">🎬 Hero — главный экран</a>
+      <a href="#" onclick="nav('stats')">📊 Статистика</a>
+      <a href="#" onclick="nav('portfolio')">🎥 Портфолио</a>
+      <a href="#" onclick="nav('services')">💼 Услуги и цены</a>
+      <a href="#" onclick="nav('faq')">❓ FAQ</a>
+      <div class="sec-label">Настройки</div>
+      <a href="#" onclick="nav('contacts')">📞 Контакты</a>
+      <a href="#" onclick="nav('footer')">🔗 Футер</a>
+    </nav>
+
+    <div class="content">
+
+      <!-- HERO -->
+      <div class="page active" id="page-hero">
+        <div class="page-header">
+          <h2>Hero — главный экран</h2>
+          <p>Первый экран — самый важный. Здесь меняешь заголовок, подзаголовок и теги.</p>
+        </div>
+
+        <div class="card">
+          <div class="card-title"><div class="dot"></div>Тег над заголовком</div>
+          <div class="field">
+            <label>Текст тега</label>
+            <input type="text" id="hero-tag" placeholder="ИИ-ВИДЕО — ДЛЯ ВАШЕГО БИЗНЕСА">
+            <div class="hint">Отображается в фигурных скобках { } над заголовком</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title"><div class="dot"></div>Главный заголовок H1</div>
+          <div class="field">
+            <label>Строка 1</label>
+            <input type="text" id="hero-h1-1" placeholder="Создаём AI-видео,">
+          </div>
+          <div class="field">
+            <label>Строка 2</label>
+            <input type="text" id="hero-h1-2" placeholder="от которых невозможно">
+          </div>
+          <div class="field">
+            <label>Слово с градиентом (строка 3)</label>
+            <input type="text" id="hero-h1-3" placeholder="оторваться">
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title"><div class="dot"></div>Подзаголовок</div>
+          <div class="field">
+            <label>Текст под заголовком</label>
+            <textarea id="hero-subtitle" placeholder="Рекламные и вирусные ролики с помощью AI..."></textarea>
+            <div class="hint">Используй &amp;nbsp; для неразрывного пробела. Отображается серым цветом.</div>
+          </div>
+        </div>
+
+        <div class="footer-actions">
+          <button class="btn btn-ghost" onclick="loadSite()">Отменить изменения</button>
+          <button class="btn btn-primary" onclick="saveSection('hero')">
+            <span>💾 Сохранить Hero</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- STATS -->
+      <div class="page" id="page-stats">
+        <div class="page-header">
+          <h2>Статистика</h2>
+          <p>Четыре цифры в блоке «О нас». Только числа — знак + добавляется автоматически.</p>
+        </div>
+        <div class="card">
+          <div class="card-title"><div class="dot"></div>Цифры статистики</div>
+          <div class="row2">
+            <div class="field">
+              <label>Статистика 1 (число)</label>
+              <input type="text" id="stat-1" placeholder="400">
+              <div class="hint">AI-видео произведено</div>
+            </div>
+            <div class="field">
+              <label>Статистика 2 (число)</label>
+              <input type="text" id="stat-2" placeholder="10">
+              <div class="hint">Специалистов в команде</div>
+            </div>
+            <div class="field">
+              <label>Статистика 3 (число)</label>
+              <input type="text" id="stat-3" placeholder="21">
+              <div class="hint">Млн просмотров YouTube</div>
+            </div>
+            <div class="field">
+              <label>Статистика 4 (число)</label>
+              <input type="text" id="stat-4" placeholder="40">
+              <div class="hint">Млн просмотров соцсети</div>
+            </div>
+          </div>
+          <hr class="sep">
+          <div class="row2">
+            <div class="field">
+              <label>Hero — мини-stat 1 (число+)</label>
+              <input type="text" id="hero-stat-1" placeholder="400+">
+              <div class="hint">Например: 400+</div>
+            </div>
+            <div class="field">
+              <label>Hero — мини-stat 2</label>
+              <input type="text" id="hero-stat-2" placeholder="61M+">
+              <div class="hint">Например: 61M+</div>
+            </div>
+          </div>
+        </div>
+        <div class="footer-actions">
+          <button class="btn btn-ghost" onclick="loadSite()">Отменить</button>
+          <button class="btn btn-primary" onclick="saveSection('stats')">💾 Сохранить статистику</button>
+        </div>
+      </div>
+
+      <!-- PORTFOLIO -->
+      <div class="page" id="page-portfolio">
+        <div class="page-header">
+          <h2>Портфолио</h2>
+          <p>9 карточек работ. Для каждой: клиент, тип, описание, год, просмотры.</p>
+        </div>
+        <div id="portfolio-cards"></div>
+        <div class="footer-actions">
+          <button class="btn btn-ghost" onclick="loadSite()">Отменить</button>
+          <button class="btn btn-primary" onclick="saveSection('portfolio')">💾 Сохранить портфолио</button>
+        </div>
+      </div>
+
+      <!-- SERVICES -->
+      <div class="page" id="page-services">
+        <div class="page-header">
+          <h2>Услуги и цены</h2>
+          <p>5 услуг. Меняй цену, срок и описание для каждой.</p>
+        </div>
+        <div id="services-list"></div>
+        <div class="footer-actions">
+          <button class="btn btn-ghost" onclick="loadSite()">Отменить</button>
+          <button class="btn btn-primary" onclick="saveSection('services')">💾 Сохранить услуги</button>
+        </div>
+      </div>
+
+      <!-- FAQ -->
+      <div class="page" id="page-faq">
+        <div class="page-header">
+          <h2>FAQ — частые вопросы</h2>
+          <p>8 вопросов и ответов. Редактируй прямо здесь.</p>
+        </div>
+        <div id="faq-list"></div>
+        <div class="footer-actions">
+          <button class="btn btn-ghost" onclick="loadSite()">Отменить</button>
+          <button class="btn btn-primary" onclick="saveSection('faq')">💾 Сохранить FAQ</button>
+        </div>
+      </div>
+
+      <!-- CONTACTS -->
+      <div class="page" id="page-contacts">
+        <div class="page-header">
+          <h2>Контакты</h2>
+          <p>Email, Telegram и телефон — отображаются в секции Контакты и футере.</p>
+        </div>
+        <div class="card">
+          <div class="card-title"><div class="dot"></div>Контактные данные</div>
+          <div class="field">
+            <label>Email</label>
+            <input type="email" id="contact-email" placeholder="info@tola.video">
+          </div>
+          <div class="field">
+            <label>Telegram (только username без @)</label>
+            <input type="text" id="contact-tg" placeholder="tola_video">
+          </div>
+          <div class="field">
+            <label>Телефон</label>
+            <input type="text" id="contact-phone" placeholder="+7 (495) 000-00-00">
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title"><div class="dot"></div>Ссылки на соцсети (в футере)</div>
+          <div class="row2">
+            <div class="field">
+              <label>Telegram URL</label>
+              <input type="text" id="social-tg" placeholder="https://t.me/tola_video">
+            </div>
+            <div class="field">
+              <label>YouTube URL</label>
+              <input type="text" id="social-yt" placeholder="https://youtube.com/@tola">
+            </div>
+            <div class="field">
+              <label>Instagram URL</label>
+              <input type="text" id="social-ig" placeholder="https://instagram.com/tola">
+            </div>
+            <div class="field">
+              <label>TikTok URL</label>
+              <input type="text" id="social-tt" placeholder="https://tiktok.com/@tola">
+            </div>
+          </div>
+        </div>
+        <div class="footer-actions">
+          <button class="btn btn-ghost" onclick="loadSite()">Отменить</button>
+          <button class="btn btn-primary" onclick="saveSection('contacts')">💾 Сохранить контакты</button>
+        </div>
+      </div>
+
+      <!-- FOOTER -->
+      <div class="page" id="page-footer">
+        <div class="page-header">
+          <h2>Футер</h2>
+          <p>Копирайт и ссылки в нижней части сайта.</p>
+        </div>
+        <div class="card">
+          <div class="card-title"><div class="dot"></div>Нижняя строка</div>
+          <div class="field">
+            <label>Текст копирайта</label>
+            <input type="text" id="footer-copy" placeholder="© 2025 Tola.Video. Все права защищены.">
+          </div>
+        </div>
+        <div class="footer-actions">
+          <button class="btn btn-ghost" onclick="loadSite()">Отменить</button>
+          <button class="btn btn-primary" onclick="saveSection('footer')">💾 Сохранить футер</button>
+        </div>
+      </div>
+
+    </div><!-- /content -->
+  </div><!-- /main -->
+</div><!-- /app -->
+
+<!-- LOAD OVERLAY -->
+<div id="load-overlay">
+  <div class="spin"></div>
+  <p id="load-msg">Загрузка сайта...</p>
+</div>
+
+<!-- STATUS BAR -->
+<div id="status-bar"></div>
+
+<script>
+const OWNER = 'Tola-AI';
+const REPO  = 'Site_TolaAI';
+const FILE  = 'index.html';
+
+let TOKEN = '';
+let currentHTML = '';
+let fileSHA = '';
+
+// ========== AUTH ==========
+function authenticate(){
+  const t = document.getElementById('token-input').value.trim();
+  if(!t){ toast('Введи токен', 'error'); return; }
+  TOKEN = t;
+  document.getElementById('auth-overlay').style.display = 'none';
+  document.getElementById('app').style.display = 'flex';
+  loadSite();
+}
+document.getElementById('token-input').addEventListener('keydown', e => {
+  if(e.key === 'Enter') authenticate();
+});
+
+function logout(){
+  TOKEN = '';
+  currentHTML = '';
+  document.getElementById('auth-overlay').style.display = 'flex';
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('token-input').value = '';
+}
+
+// ========== NAV ==========
+function nav(section){
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.sidebar a').forEach(a => a.classList.remove('active'));
+  document.getElementById('page-'+section).classList.add('active');
+  event.target.classList.add('active');
+  event.preventDefault();
+}
+
+// ========== GITHUB API ==========
+async function ghGet(path){
+  const r = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/contents/${path}`, {
+    headers:{ Authorization:`token ${TOKEN}`, Accept:'application/vnd.github.v3+json' }
+  });
+  if(!r.ok) throw new Error('GitHub GET failed: ' + r.status);
+  return r.json();
+}
+
+async function ghPut(path, content, sha, message){
+  const encoded = btoa(unescape(encodeURIComponent(content)));
+  const r = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/contents/${path}`, {
+    method:'PUT',
+    headers:{ Authorization:`token ${TOKEN}`, 'Content-Type':'application/json' },
+    body: JSON.stringify({ message, content: encoded, sha })
+  });
+  if(!r.ok){
+    const e = await r.json();
+    throw new Error(e.message || 'GitHub PUT failed');
+  }
+  return r.json();
+}
+
+// ========== LOAD SITE ==========
+async function loadSite(){
+  showLoader('Загружаю сайт из GitHub...');
+  try {
+    const data = await ghGet(FILE);
+    fileSHA = data.sha;
+    // Decode base64
+    currentHTML = decodeURIComponent(escape(atob(data.content.replace(/\n/g,''))));
+    // Extract actual HTML from bundler template
+    const html = extractTemplate(currentHTML);
+    if(!html){ toast('Не удалось распарсить шаблон', 'error'); return; }
+    populateForms(html);
+    toast('Сайт загружен', 'success');
+  } catch(e){
+    toast('Ошибка: ' + e.message, 'error');
+  } finally {
+    hideLoader();
+  }
+}
+
+function extractTemplate(raw){
+  const match = raw.match(/<script type="__bundler\/template">\n([\s\S]+?)\n<\/script>/);
+  if(!match) return null;
+  try { return JSON.parse(match[1]); } catch(e){ return null; }
+}
+
+// ========== POPULATE FORMS ==========
+function populateForms(html){
+  // HERO TAG
+  const tagM = html.match(/class="tag curly">([^<]+)<\/span>/);
+  if(tagM) set('hero-tag', tagM[1]);
+
+  // HERO H1
+  const h1M = html.match(/<h1 class="h1">\s*([\s\S]*?)<\/h1>/);
+  if(h1M){
+    const inner = h1M[1];
+    const lines = inner.replace(/<br>/g,'|||').replace(/<[^>]+>/g,'').split('|||').map(s=>s.trim()).filter(Boolean);
+    if(lines[0]) set('hero-h1-1', lines[0].replace(/,$/, ','));
+    if(lines[1]) set('hero-h1-2', lines[1]);
+    const gradM = inner.match(/<span class="grad-text">([^<]+)<\/span>/);
+    if(gradM) set('hero-h1-3', gradM[1]);
+  }
+
+  // HERO SUBTITLE
+  const subM = html.match(/<p class="body-lg subtitle">([\s\S]*?)<\/p>/);
+  if(subM) set('hero-subtitle', subM[1].trim());
+
+  // HERO MINI STATS
+  const heroStats = [...html.matchAll(/<div class="hero-side">[\s\S]*?<b>([^<]+)<\/b>/g)];
+  // simpler: find items inside hero-side
+  const hSideM = html.match(/<div class="hero-side">([\s\S]*?)<\/div>/);
+  if(hSideM){
+    const bits = [...hSideM[1].matchAll(/<b>([^<]+)<\/b>/g)];
+    if(bits[0]) set('hero-stat-1', bits[0][1]);
+    if(bits[1]) set('hero-stat-2', bits[1][1]);
+  }
+
+  // STATS (4 stat blocks)
+  const statNums = [...html.matchAll(/<div class="num">(\d+)<em>/g)];
+  statNums.forEach((m,i)=>{ if(i<4) set('stat-'+(i+1), m[1]); });
+
+  // PORTFOLIO CARDS
+  buildPortfolioForms(html);
+
+  // SERVICES
+  buildServicesForms(html);
+
+  // FAQ
+  buildFaqForms(html);
+
+  // CONTACTS
+  const emailM = html.match(/mailto:([^\\"]+)/);
+  if(emailM) set('contact-email', emailM[1]);
+  const tgM = html.match(/@tola_video/);
+  if(tgM) set('contact-tg', 'tola_video');
+  const phoneM = html.match(/\+7 \(\d+\)[^<"]+/);
+  if(phoneM) set('contact-phone', phoneM[0].trim());
+
+  // SOCIALS - find href values in footer .soc links
+  const socM = [...html.matchAll(/class="soc" aria-label="([^"]+)"[\s\S]*?href="([^"]+)"/g)];
+  const socMap = {};
+  socM.forEach(m => socMap[m[1]] = m[2]);
+  set('social-tg', socMap['Telegram'] || '');
+  set('social-yt', socMap['YouTube'] || '');
+  set('social-ig', socMap['Instagram'] || '');
+  set('social-tt', socMap['TikTok'] || '');
+
+  // FOOTER COPYRIGHT
+  const copyM = html.match(/©[^<]+/);
+  if(copyM) set('footer-copy', copyM[0].trim());
+}
+
+function buildPortfolioForms(html){
+  const articles = [...html.matchAll(/<article class="pf-card[^"]*">([\s\S]*?)<\/article>/g)];
+  const container = document.getElementById('portfolio-cards');
+  container.innerHTML = '';
+  articles.forEach((m, i)=>{
+    const inner = m[1];
+    const tagM = inner.match(/class="tag curly">([^<]+)<\/span>/);
+    const h4M = inner.match(/<h4 class="h4">([^<]+)<\/h4>/);
+    const descM = inner.match(/<p class="desc">([^<]+)<\/p>/);
+    const yearM = inner.match(/<span>(\d{4})<\/span>/);
+    const viewsM = inner.match(/<span class="views">([^<]+)<\/span>/);
+    
+    const div = document.createElement('div');
+    div.className = 'card';
+    div.innerHTML = `
+      <div class="card-title"><div class="dot"></div>Карточка ${i+1} ${i<3?'(Featured)':'(Regular)'}</div>
+      <div class="row2">
+        <div class="field"><label>Клиент / название</label><input type="text" id="pf-${i}-client" value="${esc(h4M?h4M[1]:'')}" placeholder="Название клиента"></div>
+        <div class="field"><label>Тип (тег)</label><input type="text" id="pf-${i}-tag" value="${esc(tagM?tagM[1]:'')}" placeholder="ИИ-ВИДЕО — РЕКЛАМА"></div>
+      </div>
+      <div class="field"><label>Описание</label><input type="text" id="pf-${i}-desc" value="${esc(descM?descM[1]:'')}" placeholder="Краткое описание ролика"></div>
+      <div class="row2">
+        <div class="field"><label>Год</label><input type="text" id="pf-${i}-year" value="${esc(yearM?yearM[1]:'2025')}" placeholder="2025"></div>
+        <div class="field"><label>Просмотры</label><input type="text" id="pf-${i}-views" value="${esc(viewsM?viewsM[1]:'')}" placeholder="👁 1.2M"></div>
+      </div>
+    `;
+    container.appendChild(div);
+  });
+}
+
+function buildServicesForms(html){
+  const svcs = [...html.matchAll(/<div class="svc">([\s\S]*?)<\/div>\s*<\/div>\s*<\/div>\s*(?=<div class="svc">|<\/div>\s*<\/div>)/g)];
+  // simpler: find by .svc
+  const svcBlocks = [...html.matchAll(/<div class="svc">([\s\S]*?)<\/div>\s*<\/div>/g)];
+  const container = document.getElementById('services-list');
+  container.innerHTML = '';
+  
+  // Parse services manually
+  const names = [...html.matchAll(/<h3>([^<]+)<\/h3>/g)].slice(0, 5);
+  const descs = [...html.matchAll(/<p>([^<]*(?:&nbsp;[^<]*)*)<\/p>/g)].filter(m=>m[1].length > 30).slice(1, 6);
+  const prices = [...html.matchAll(/<div class="price"><small>Цена от<\/small>([^<]+)<\/div>/g)];
+  const terms = [...html.matchAll(/<b>(\d+ дн[^<]+)<\/b>/g)];
+  
+  const count = Math.min(5, names.length);
+  for(let i=0;i<count;i++){
+    const div = document.createElement('div');
+    div.className = 'card';
+    div.innerHTML = `
+      <div class="card-title"><div class="dot"></div>Услуга ${i+1}: ${esc(names[i]?names[i][1]:'')}</div>
+      <div class="field"><label>Название услуги</label><input type="text" id="svc-${i}-name" value="${esc(names[i]?names[i][1]:'')}" placeholder="Название"></div>
+      <div class="field"><label>Описание</label><textarea id="svc-${i}-desc" placeholder="Описание">${esc(descs[i]?descs[i][1]:'')}</textarea></div>
+      <div class="row2">
+        <div class="field"><label>Цена (с форматированием)</label><input type="text" id="svc-${i}-price" value="${esc(prices[i]?prices[i][1]:'')}" placeholder="50 000&amp;nbsp;₽"></div>
+        <div class="field"><label>Срок</label><input type="text" id="svc-${i}-term" value="${esc(terms[i]?terms[i][1]:'')}" placeholder="7 дней"></div>
+      </div>
+    `;
+    container.appendChild(div);
+  }
+}
+
+function buildFaqForms(html){
+  const qs = [...html.matchAll(/<button class="faq-q">([^<]+)/g)];
+  const as = [...html.matchAll(/<div class="inner">([\s\S]*?)<\/div>/g)];
+  const container = document.getElementById('faq-list');
+  container.innerHTML = '';
+  const count = Math.min(qs.length, as.length);
+  for(let i=0;i<count;i++){
+    const div = document.createElement('div');
+    div.className = 'card';
+    div.innerHTML = `
+      <div class="card-title"><div class="dot"></div>Вопрос ${i+1}</div>
+      <div class="field"><label>Вопрос</label><input type="text" id="faq-${i}-q" value="${esc(qs[i][1].trim())}"></div>
+      <div class="field"><label>Ответ</label><textarea id="faq-${i}-a" style="height:70px">${esc(as[i][1].trim())}</textarea></div>
+    `;
+    container.appendChild(div);
+  }
+}
+
+// ========== SAVE SECTIONS ==========
+async function saveSection(section){
+  if(!currentHTML){ toast('Сначала загрузи сайт', 'error'); return; }
+  showLoader('Сохраняю изменения...');
+  try {
+    const html = extractTemplate(currentHTML);
+    const newHTML = applyChanges(html, section);
+    const newRaw = rebuildBundler(currentHTML, newHTML);
+    const result = await ghPut(FILE, newRaw, fileSHA, `Admin: update ${section}`);
+    fileSHA = result.content.sha;
+    // Update local copy
+    currentHTML = newRaw;
+    toast('✅ Сохранено! Сайт обновится через ~30 секунд.', 'success');
+  } catch(e){
+    toast('Ошибка сохранения: ' + e.message, 'error');
+  } finally {
+    hideLoader();
+  }
+}
+
+function applyChanges(html, section){
+  let h = html;
+  
+  if(section === 'hero'){
+    const tag = get('hero-tag');
+    const h1 = get('hero-h1-1');
+    const h2 = get('hero-h1-2');
+    const h3 = get('hero-h1-3');
+    const sub = get('hero-subtitle');
+    
+    // Replace tag
+    h = h.replace(/class="tag curly">([^<]+)<\/span>/, `class="tag curly">${tag}</span>`);
+    
+    // Replace H1
+    h = h.replace(
+      /<h1 class="h1">([\s\S]*?)<\/h1>/,
+      `<h1 class="h1">\n      ${h1}<br>\n      ${h2}<br>\n      <span class="grad-text">${h3}</span>\n    </h1>`
+    );
+    
+    // Replace subtitle
+    h = h.replace(
+      /(<p class="body-lg subtitle">)([\s\S]*?)(<\/p>)/,
+      `$1\n      ${sub}\n    $3`
+    );
+  }
+
+  if(section === 'stats'){
+    // Stats 1-4 (the main .num divs)
+    let idx = 0;
+    h = h.replace(/<div class="num">(\d+)<em>/g, (m, n) => {
+      idx++;
+      if(idx <= 4){
+        const v = get('stat-'+idx) || n;
+        return `<div class="num">${v}<em>`;
+      }
+      return m;
+    });
+
+    // Hero side stats
+    const s1 = get('hero-stat-1') || '400+';
+    const s2 = get('hero-stat-2') || '61M+';
+    h = h.replace(
+      /(<div class="hero-side">[\s\S]*?<b>)([^<]+)(<\/b>)/,
+      `$1${s1}$3`
+    );
+    // Second hero stat
+    let firstDone = false;
+    h = h.replace(/<b>([^<]+)<\/b>Просмотров/, `<b>${s2}</b>Просмотров`);
+  }
+
+  if(section === 'portfolio'){
+    const articles = [...h.matchAll(/<article class="pf-card[^"]*">([\s\S]*?)<\/article>/g)];
+    articles.forEach((m, i) => {
+      const client = get(`pf-${i}-client`);
+      const tag    = get(`pf-${i}-tag`);
+      const desc   = get(`pf-${i}-desc`);
+      const year   = get(`pf-${i}-year`);
+      const views  = get(`pf-${i}-views`);
+      if(!client) return;
+      
+      let inner = m[1];
+      inner = inner.replace(/(class="tag curly">)[^<]+(<\/span>)/, `$1${tag}$2`);
+      inner = inner.replace(/(<h4 class="h4">)[^<]+(<\/h4>)/, `$1${client}$2`);
+      inner = inner.replace(/(<p class="desc">)[^<]+(<\/p>)/, `$1${desc}$2`);
+      inner = inner.replace(/(<span>)\d{4}(<\/span>)/, `$1${year}$2`);
+      inner = inner.replace(/(<span class="views">)[^<]+(<\/span>)/, `$1${views}$2`);
+      h = h.replace(m[1], inner);
+    });
+  }
+
+  if(section === 'services'){
+    // Replace service names, prices, terms
+    const names = [...h.matchAll(/<h3>([^<]+)<\/h3>/g)];
+    for(let i=0;i<5;i++){
+      const nm = get(`svc-${i}-name`);
+      const pr = get(`svc-${i}-price`);
+      const tr = get(`svc-${i}-term`);
+      if(nm && names[i]){
+        h = h.replace(names[i][0], `<h3>${nm}</h3>`);
+      }
+    }
+    // Prices
+    let pi = 0;
+    h = h.replace(/<div class="price"><small>Цена от<\/small>([^<]+)<\/div>/g, (m,p) => {
+      const v = get(`svc-${pi}-price`) || p;
+      pi++;
+      return `<div class="price"><small>Цена от</small>${v}</div>`;
+    });
+    // Terms
+    let ti = 0;
+    h = h.replace(/<b>(\d+ дн[^<]+)<\/b>/g, (m,t) => {
+      const v = get(`svc-${ti}-term`) || t;
+      ti++;
+      return `<b>${v}</b>`;
+    });
+  }
+
+  if(section === 'faq'){
+    let qi = 0;
+    h = h.replace(/(<button class="faq-q">)([^<]+)/g, (m, pre, q) => {
+      const v = get(`faq-${qi}-q`) || q;
+      qi++;
+      return `${pre}${v}`;
+    });
+    let ai = 0;
+    h = h.replace(/(<div class="inner">)([\s\S]*?)(<\/div>)/g, (m, pre, a, post) => {
+      const v = get(`faq-${ai}-a`) || a;
+      ai++;
+      return `${pre}${v}${post}`;
+    });
+  }
+
+  if(section === 'contacts'){
+    const email = get('contact-email');
+    const tg    = get('contact-tg');
+    const phone = get('contact-phone');
+    
+    if(email){
+      h = h.replace(/mailto:[^"\\]+/g, `mailto:${email}`);
+      h = h.replace(/info@tola\.video/g, email);
+    }
+    if(tg){
+      h = h.replace(/@tola_video/g, `@${tg}`);
+      h = h.replace(/https:\/\/t\.me\/[^"]+/g, `https://t.me/${tg}`);
+    }
+    if(phone){
+      h = h.replace(/\+7 \(\d+\)[^<"]+/g, phone);
+    }
+
+    // Social links
+    const stg = get('social-tg');
+    const syt = get('social-yt');
+    const sig = get('social-ig');
+    const stt = get('social-tt');
+
+    if(stg) h = h.replace(/(aria-label="Telegram"[\s\S]*?href=")[^"]+(")/g, `$1${stg}$2`);
+    if(syt) h = h.replace(/(aria-label="YouTube"[\s\S]*?href=")[^"]+(")/g, `$1${syt}$2`);
+    if(sig) h = h.replace(/(aria-label="Instagram"[\s\S]*?href=")[^"]+(")/g, `$1${sig}$2`);
+    if(stt) h = h.replace(/(aria-label="TikTok"[\s\S]*?href=")[^"]+(")/g, `$1${stt}$2`);
+  }
+
+  if(section === 'footer'){
+    const copy = get('footer-copy');
+    if(copy) h = h.replace(/©[^<]+/, copy);
+  }
+
+  return h;
+}
+
+function rebuildBundler(rawBundler, newHTML){
+  // Find the template script and replace its content
+  const newJSON = JSON.stringify(newHTML);
+  return rawBundler.replace(
+    /(<script type="__bundler\/template">\n)([\s\S]+?)(\n<\/script>)/,
+    `$1${newJSON}$3`
+  );
+}
+
+// ========== UTILS ==========
+function get(id){ const el = document.getElementById(id); return el ? el.value : ''; }
+function set(id, val){ const el = document.getElementById(id); if(el) el.value = val; }
+function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+function showLoader(msg){
+  const o = document.getElementById('load-overlay');
+  document.getElementById('load-msg').textContent = msg;
+  o.style.display = 'flex';
+}
+function hideLoader(){ document.getElementById('load-overlay').style.display = 'none'; }
+
+let toastTimer;
+function toast(msg, type='loading'){
+  const bar = document.getElementById('status-bar');
+  const t = document.createElement('div');
+  t.className = `toast ${type}`;
+  const icon = type === 'success' ? '✓' : type === 'error' ? '✕' : '';
+  t.innerHTML = `${icon?`<span>${icon}</span>`:'<div class="spin"></div>'}<span>${msg}</span>`;
+  bar.appendChild(t);
+  setTimeout(()=>{ t.style.opacity='0'; t.style.transition='opacity .4s'; setTimeout(()=>t.remove(), 400); }, 4000);
+}
+</script>
+</body>
+</html>

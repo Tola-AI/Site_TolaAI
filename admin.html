@@ -89,13 +89,14 @@ a{color:inherit;text-decoration:none}
     <h1>🔐 Admin Panel</h1>
     <p class="sub">tola.video — панель управления сайтом</p>
     <label>GitHub Personal Access Token</label>
-    <input type="password" id="token-input" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" autocomplete="off">
+    <input type="password" id="token-input" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" autocomplete="off"
+           onkeydown="if(event.key==='Enter') doLogin()">
     <div class="hint">
       Создать токен: <a href="https://github.com/settings/tokens" target="_blank">github.com/settings/tokens</a><br>
       Нужно разрешение <b>repo</b>. Токен хранится только в памяти браузера.
     </div>
     <div id="login-error"></div>
-    <button class="btn btn-primary" style="width:100%;height:50px;font-size:15px" id="login-btn">
+    <button class="btn btn-primary" style="width:100%;height:50px;font-size:15px" onclick="doLogin()">
       Войти в панель
     </button>
   </div>
@@ -107,22 +108,22 @@ a{color:inherit;text-decoration:none}
     <div class="logo">tola<em>.video</em> <span class="badge">Admin</span></div>
     <div class="topbar-right">
       <a href="https://tola-ai.github.io/Site_TolaAI/" target="_blank" class="btn btn-ghost btn-sm">Открыть сайт ↗</a>
-      <button class="btn btn-ghost btn-sm" id="refresh-btn">🔄 Обновить</button>
-      <button class="btn btn-danger btn-sm" id="logout-btn">Выйти</button>
+      <button class="btn btn-ghost btn-sm" onclick="loadSite()">🔄 Обновить</button>
+      <button class="btn btn-danger btn-sm" onclick="doLogout()">Выйти</button>
     </div>
   </div>
 
   <div class="main">
     <nav class="sidebar">
       <div class="sec-label">Контент</div>
-      <a href="#" class="active" data-page="hero">🎬 Hero — главный экран</a>
-      <a href="#" data-page="stats">📊 Статистика</a>
-      <a href="#" data-page="portfolio">🎥 Портфолио</a>
-      <a href="#" data-page="services">💼 Услуги и цены</a>
-      <a href="#" data-page="faq">❓ FAQ</a>
+      <a href="#" class="active" onclick="showPage('hero');setActive(this);return false">🎬 Hero — главный экран</a>
+      <a href="#" onclick="showPage('stats');setActive(this);return false">📊 Статистика</a>
+      <a href="#" onclick="showPage('portfolio');setActive(this);return false">🎥 Портфолио</a>
+      <a href="#" onclick="showPage('services');setActive(this);return false">💼 Услуги и цены</a>
+      <a href="#" onclick="showPage('faq');setActive(this);return false">❓ FAQ</a>
       <div class="sec-label">Настройки</div>
-      <a href="#" data-page="contacts">📞 Контакты</a>
-      <a href="#" data-page="footer">🔗 Футер</a>
+      <a href="#" onclick="showPage('contacts');setActive(this);return false">📞 Контакты</a>
+      <a href="#" onclick="showPage('footer');setActive(this);return false">🔗 Футер</a>
     </nav>
 
     <div class="content">
@@ -144,8 +145,8 @@ a{color:inherit;text-decoration:none}
           <div class="field"><label>Текст</label><textarea id="hero-subtitle" placeholder="Рекламные и вирусные ролики..."></textarea></div>
         </div>
         <div class="footer-actions">
-          <button class="btn btn-ghost" data-cancel>Отменить</button>
-          <button class="btn btn-primary" data-save="hero">💾 Сохранить Hero</button>
+          <button class="btn btn-ghost" onclick="loadSite()">Отменить</button>
+          <button class="btn btn-primary" onclick="saveSection('hero')">💾 Сохранить Hero</button>
         </div>
       </div>
 
@@ -161,8 +162,8 @@ a{color:inherit;text-decoration:none}
           </div>
         </div>
         <div class="footer-actions">
-          <button class="btn btn-ghost" data-cancel>Отменить</button>
-          <button class="btn btn-primary" data-save="stats">💾 Сохранить</button>
+          <button class="btn btn-ghost" onclick="loadSite()">Отменить</button>
+          <button class="btn btn-primary" onclick="saveSection('stats')">💾 Сохранить</button>
         </div>
       </div>
 
@@ -170,8 +171,8 @@ a{color:inherit;text-decoration:none}
         <div class="page-header"><h2>Портфолио</h2><p>9 карточек работ.</p></div>
         <div id="portfolio-cards"></div>
         <div class="footer-actions">
-          <button class="btn btn-ghost" data-cancel>Отменить</button>
-          <button class="btn btn-primary" data-save="portfolio">💾 Сохранить портфолио</button>
+          <button class="btn btn-ghost" onclick="loadSite()">Отменить</button>
+          <button class="btn btn-primary" onclick="saveSection('portfolio')">💾 Сохранить портфолио</button>
         </div>
       </div>
 
@@ -179,8 +180,8 @@ a{color:inherit;text-decoration:none}
         <div class="page-header"><h2>Услуги и цены</h2><p>5 услуг.</p></div>
         <div id="services-list"></div>
         <div class="footer-actions">
-          <button class="btn btn-ghost" data-cancel>Отменить</button>
-          <button class="btn btn-primary" data-save="services">💾 Сохранить услуги</button>
+          <button class="btn btn-ghost" onclick="loadSite()">Отменить</button>
+          <button class="btn btn-primary" onclick="saveSection('services')">💾 Сохранить услуги</button>
         </div>
       </div>
 
@@ -188,8 +189,8 @@ a{color:inherit;text-decoration:none}
         <div class="page-header"><h2>FAQ</h2><p>8 вопросов и ответов.</p></div>
         <div id="faq-list"></div>
         <div class="footer-actions">
-          <button class="btn btn-ghost" data-cancel>Отменить</button>
-          <button class="btn btn-primary" data-save="faq">💾 Сохранить FAQ</button>
+          <button class="btn btn-ghost" onclick="loadSite()">Отменить</button>
+          <button class="btn btn-primary" onclick="saveSection('faq')">💾 Сохранить FAQ</button>
         </div>
       </div>
 
@@ -202,8 +203,8 @@ a{color:inherit;text-decoration:none}
           <div class="field"><label>Телефон</label><input type="text" id="contact-phone" placeholder="+7 (495) 000-00-00"></div>
         </div>
         <div class="footer-actions">
-          <button class="btn btn-ghost" data-cancel>Отменить</button>
-          <button class="btn btn-primary" data-save="contacts">💾 Сохранить контакты</button>
+          <button class="btn btn-ghost" onclick="loadSite()">Отменить</button>
+          <button class="btn btn-primary" onclick="saveSection('contacts')">💾 Сохранить контакты</button>
         </div>
       </div>
 
@@ -214,8 +215,8 @@ a{color:inherit;text-decoration:none}
           <div class="field"><label>Текст</label><input type="text" id="footer-copy" placeholder="© 2025 Tola.Video. Все права защищены."></div>
         </div>
         <div class="footer-actions">
-          <button class="btn btn-ghost" data-cancel>Отменить</button>
-          <button class="btn btn-primary" data-save="footer">💾 Сохранить футер</button>
+          <button class="btn btn-ghost" onclick="loadSite()">Отменить</button>
+          <button class="btn btn-primary" onclick="saveSection('footer')">💾 Сохранить футер</button>
         </div>
       </div>
 
@@ -232,77 +233,22 @@ var OWNER = 'Tola-AI';
 var REPO  = 'Site_TolaAI';
 var FILE  = 'index.html';
 var TOKEN = '';
-var rawFile = '';
-var innerHTML = '';
-var fileSHA = '';
+var rawFile   = '';
+var siteHTML  = '';   // decoded inner HTML string (JSON-parsed from template)
+var fileSHA   = '';
 
-// ===== INIT =====
-window.addEventListener('DOMContentLoaded', function() {
-  console.log('Admin panel loaded');
-
-  // Login button
-  document.getElementById('login-btn').addEventListener('click', function() {
-    console.log('Login clicked');
-    doLogin();
-  });
-
-  // Enter key in token field
-  document.getElementById('token-input').addEventListener('keydown', function(e) {
-    if(e.key === 'Enter') doLogin();
-  });
-
-  // Refresh button
-  document.getElementById('refresh-btn').addEventListener('click', function() {
-    loadSite();
-  });
-
-  // Logout button
-  document.getElementById('logout-btn').addEventListener('click', function() {
-    doLogout();
-  });
-
-  // Sidebar navigation
-  document.querySelectorAll('.sidebar a[data-page]').forEach(function(link) {
-    link.addEventListener('click', function(e) {
-      e.preventDefault();
-      var page = this.getAttribute('data-page');
-      showPage(page);
-      document.querySelectorAll('.sidebar a').forEach(function(a) { a.classList.remove('active'); });
-      this.classList.add('active');
-    });
-  });
-
-  // Save buttons
-  document.querySelectorAll('[data-save]').forEach(function(btn) {
-    btn.addEventListener('click', function() {
-      var section = this.getAttribute('data-save');
-      saveSection(section);
-    });
-  });
-
-  // Cancel buttons
-  document.querySelectorAll('[data-cancel]').forEach(function(btn) {
-    btn.addEventListener('click', function() {
-      loadSite();
-    });
-  });
-});
+// Bundler template tag — split so the parser never sees a real closing tag here
+var TMPL_OPEN  = '<scr' + 'ipt type="__bundler/template">';
+var TMPL_CLOSE = '<\/sc' + 'ript>';   // raw: <\/script> — browser won't close tag on this
 
 // ===== LOGIN =====
 function doLogin() {
   var t = document.getElementById('token-input').value.trim();
-  console.log('Token length:', t.length);
-
-  if(!t) {
-    showLoginError('Введи токен!');
-    return;
-  }
-
-  if(!t.startsWith('ghp_') && !t.startsWith('github_pat_')) {
+  if (!t) { showLoginError('Введи токен!'); return; }
+  if (!t.startsWith('ghp_') && !t.startsWith('github_pat_')) {
     showLoginError('Токен должен начинаться с ghp_ или github_pat_');
     return;
   }
-
   TOKEN = t;
   hideLoginError();
   document.getElementById('auth-overlay').style.display = 'none';
@@ -311,7 +257,7 @@ function doLogin() {
 }
 
 function doLogout() {
-  TOKEN = ''; rawFile = ''; innerHTML = ''; fileSHA = '';
+  TOKEN = ''; rawFile = ''; siteHTML = ''; fileSHA = '';
   document.getElementById('auth-overlay').style.display = 'flex';
   document.getElementById('app').style.display = 'none';
   document.getElementById('token-input').value = '';
@@ -328,9 +274,13 @@ function hideLoginError() {
 
 // ===== PAGE NAV =====
 function showPage(name) {
-  document.querySelectorAll('.page').forEach(function(p) { p.classList.remove('active'); });
+  document.querySelectorAll('.page').forEach(function(p){ p.classList.remove('active'); });
   var pg = document.getElementById('page-' + name);
-  if(pg) pg.classList.add('active');
+  if (pg) pg.classList.add('active');
+}
+function setActive(link) {
+  document.querySelectorAll('.sidebar a').forEach(function(a){ a.classList.remove('active'); });
+  link.classList.add('active');
 }
 
 // ===== GITHUB API =====
@@ -341,10 +291,10 @@ function ghGet(path) {
       'Accept': 'application/vnd.github.v3+json'
     }
   }).then(function(r) {
-    if(!r.ok) {
-      if(r.status === 401) throw new Error('Неверный токен. Проверь и попробуй снова.');
-      if(r.status === 403) throw new Error('Нет доступа. Убедись что у токена есть право repo.');
-      if(r.status === 404) throw new Error('Файл не найден: ' + path);
+    if (!r.ok) {
+      if (r.status === 401) throw new Error('Неверный токен. Проверь и попробуй снова.');
+      if (r.status === 403) throw new Error('Нет доступа. Убедись что у токена есть право repo.');
+      if (r.status === 404) throw new Error('Файл не найден: ' + path);
       throw new Error('Ошибка GitHub: ' + r.status);
     }
     return r.json();
@@ -361,7 +311,7 @@ function ghPut(path, content, sha, message) {
     },
     body: JSON.stringify({ message: message, content: encoded, sha: sha })
   }).then(function(r) {
-    if(!r.ok) return r.json().then(function(e) { throw new Error(e.message || 'Ошибка записи'); });
+    if (!r.ok) return r.json().then(function(e){ throw new Error(e.message || 'Ошибка записи'); });
     return r.json();
   });
 }
@@ -371,52 +321,44 @@ function b64Decode(b64) {
   var clean = b64.replace(/\s/g, '');
   var binary = atob(clean);
   var bytes = new Uint8Array(binary.length);
-  for(var i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+  for (var i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
   return new TextDecoder('utf-8').decode(bytes);
 }
 
 function b64Encode(str) {
   var bytes = new TextEncoder().encode(str);
   var binary = '';
-  for(var i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
+  for (var i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
   return btoa(binary);
 }
 
 // ===== TEMPLATE EXTRACTION =====
 function extractTemplate(raw) {
-  var OPEN  = '<script type="__bundler/template">';
-  var CLOSE = '<\/script>';
-
-  var start = raw.indexOf(OPEN);
-  if(start === -1) {
+  var start = raw.indexOf(TMPL_OPEN);
+  if (start === -1) {
     console.error('Тег __bundler/template не найден');
     return null;
   }
-
-  var contentStart = start + OPEN.length;
-  var end = raw.indexOf(CLOSE, contentStart);
-  if(end === -1) {
-    console.error('Закрывающий тег не найден');
+  var contentStart = start + TMPL_OPEN.length;
+  var end = raw.indexOf(TMPL_CLOSE, contentStart);
+  if (end === -1) {
+    console.error('Закрывающий тег шаблона не найден');
     return null;
   }
-
   var jsonStr = raw.slice(contentStart, end).trim();
-  console.log('JSON length:', jsonStr.length, 'starts with:', jsonStr.substring(0, 30));
-
+  console.log('Длина JSON шаблона:', jsonStr.length);
   try {
     return JSON.parse(jsonStr);
   } catch(e) {
-    console.error('JSON.parse failed:', e.message);
+    console.error('JSON.parse ошибка:', e.message);
     return null;
   }
 }
 
 function rebuildRaw(raw, newInner) {
-  var OPEN  = '<script type="__bundler/template">';
-  var CLOSE = '<\/script>';
-  var start = raw.indexOf(OPEN);
-  var contentStart = start + OPEN.length;
-  var end = raw.indexOf(CLOSE, contentStart);
+  var start = raw.indexOf(TMPL_OPEN);
+  var contentStart = start + TMPL_OPEN.length;
+  var end = raw.indexOf(TMPL_CLOSE, contentStart);
   return raw.slice(0, contentStart) + '\n' + JSON.stringify(newInner) + '\n' + raw.slice(end);
 }
 
@@ -426,21 +368,21 @@ function loadSite() {
   ghGet(FILE).then(function(data) {
     fileSHA = data.sha;
     rawFile = b64Decode(data.content);
-    console.log('File loaded, size:', rawFile.length);
+    console.log('Файл загружен, размер:', rawFile.length);
 
     var html = extractTemplate(rawFile);
-    if(!html) {
+    if (!html) {
       toast('Не удалось прочитать шаблон. Открой F12 → Console', 'error');
+      hideLoader();
       return;
     }
-
-    innerHTML = html;
+    siteHTML = html;
     fillForms(html);
     toast('Сайт загружен ✓', 'success');
+    hideLoader();
   }).catch(function(e) {
     toast('Ошибка загрузки: ' + e.message, 'error');
     console.error(e);
-  }).finally(function() {
     hideLoader();
   });
 }
@@ -457,8 +399,8 @@ function fillForms(html) {
 
   // H1
   var h1 = first(html, /<h1 class="h1">([\s\S]*?)<\/h1>/);
-  if(h1) {
-    var parts = h1.replace(/<br\s*\/?>/gi, '|').split('|').map(function(s) {
+  if (h1) {
+    var parts = h1.replace(/<br\s*\/?>/gi, '|').split('|').map(function(s){
       return s.replace(/<[^>]+>/g, '').trim();
     }).filter(Boolean);
     setVal('hero-h1-1', parts[0] || '');
@@ -471,7 +413,7 @@ function fillForms(html) {
 
   // Stats
   var statMatches = Array.from(html.matchAll(/<div class="num">(\d[\d\s]*)<em>/g));
-  statMatches.forEach(function(m, i) { if(i < 4) setVal('stat-'+(i+1), m[1].trim()); });
+  statMatches.forEach(function(m, i){ if (i < 4) setVal('stat-'+(i+1), m[1].trim()); });
 
   // Portfolio, Services, FAQ
   buildPortfolio(html);
@@ -481,9 +423,9 @@ function fillForms(html) {
   // Contacts
   setVal('contact-email', first(html, /mailto:([^"\\]+)/));
   var tgM = html.match(/<b>@([^<]+)<\/b>[^<]*Telegram/);
-  if(tgM) setVal('contact-tg', tgM[1]);
+  if (tgM) setVal('contact-tg', tgM[1]);
   var phoneM = html.match(/<b>(\+7[^<]+)<\/b>/);
-  if(phoneM) setVal('contact-phone', phoneM[1].trim());
+  if (phoneM) setVal('contact-phone', phoneM[1].trim());
 
   // Footer
   setVal('footer-copy', first(html, /(©[^<]+)/));
@@ -519,7 +461,7 @@ function buildServices(html) {
   var box = document.getElementById('services-list');
   box.innerHTML = '';
   var count = Math.min(names.length, 5);
-  for(var i = 0; i < count; i++) {
+  for (var i = 0; i < count; i++) {
     var div = document.createElement('div');
     div.className = 'card';
     div.innerHTML =
@@ -539,7 +481,7 @@ function buildFaq(html) {
   var box = document.getElementById('faq-list');
   box.innerHTML = '';
   var count = Math.min(qs.length, as.length, 8);
-  for(var i = 0; i < count; i++) {
+  for (var i = 0; i < count; i++) {
     var div = document.createElement('div');
     div.className = 'card';
     div.innerHTML =
@@ -552,19 +494,19 @@ function buildFaq(html) {
 
 // ===== SAVE =====
 function saveSection(section) {
-  if(!innerHTML) { toast('Сначала нажми «Обновить»', 'error'); return; }
+  if (!siteHTML) { toast('Сначала нажми «Обновить»', 'error'); return; }
   showLoader('Сохраняю...');
-  var newInner = applyChanges(innerHTML, section);
+  var newInner = applyChanges(siteHTML, section);
   var newRaw   = rebuildRaw(rawFile, newInner);
   ghPut(FILE, newRaw, fileSHA, 'Admin: update ' + section).then(function(res) {
     fileSHA  = res.content.sha;
     rawFile  = newRaw;
-    innerHTML = newInner;
+    siteHTML = newInner;
     toast('✅ Сохранено! Сайт обновится через ~30 сек.', 'success');
+    hideLoader();
   }).catch(function(e) {
     toast('Ошибка: ' + e.message, 'error');
     console.error(e);
-  }).finally(function() {
     hideLoader();
   });
 }
@@ -572,16 +514,16 @@ function saveSection(section) {
 function applyChanges(html, section) {
   var h = html;
 
-  if(section === 'hero') {
+  if (section === 'hero') {
     var tag = getVal('hero-tag'), l1 = getVal('hero-h1-1'), l2 = getVal('hero-h1-2'),
         l3 = getVal('hero-h1-3'), sub = getVal('hero-subtitle');
-    if(tag) h = h.replace(/(class="tag curly">)[^<]+(<\/span>)/, '$1'+tag+'$2');
-    if(l1||l2||l3) h = h.replace(/<h1 class="h1">[\s\S]*?<\/h1>/,
+    if (tag) h = h.replace(/(class="tag curly">)[^<]+(<\/span>)/, '$1'+tag+'$2');
+    if (l1||l2||l3) h = h.replace(/<h1 class="h1">[\s\S]*?<\/h1>/,
       '<h1 class="h1">\n      '+l1+'<br>\n      '+l2+'<br>\n      <span class="grad-text">'+l3+'</span>\n    </h1>');
-    if(sub) h = h.replace(/(<p class="body-lg subtitle">)[\s\S]*?(<\/p>)/, '$1\n      '+sub+'\n    $2');
+    if (sub) h = h.replace(/(<p class="body-lg subtitle">)[\s\S]*?(<\/p>)/, '$1\n      '+sub+'\n    $2');
   }
 
-  if(section === 'stats') {
+  if (section === 'stats') {
     var idx = 0;
     h = h.replace(/<div class="num">(\d[\d\s]*)<em>/g, function(_, n) {
       idx++;
@@ -590,22 +532,22 @@ function applyChanges(html, section) {
     });
   }
 
-  if(section === 'portfolio') {
+  if (section === 'portfolio') {
     var arts = Array.from(h.matchAll(/<article class="pf-card[^"]*">([\s\S]*?)<\/article>/g));
     arts.forEach(function(m, i) {
       var inn = m[1];
       var tag = getVal('pf-'+i+'-tag'), cl = getVal('pf-'+i+'-client'),
           desc = getVal('pf-'+i+'-desc'), year = getVal('pf-'+i+'-year'), views = getVal('pf-'+i+'-views');
-      if(tag)   inn = inn.replace(/(class="tag curly">)[^<]+(<\/span>)/, '$1'+tag+'$2');
-      if(cl)    inn = inn.replace(/(<h4 class="h4">)[^<]+(<\/h4>)/, '$1'+cl+'$2');
-      if(desc)  inn = inn.replace(/(<p class="desc">)[^<]+(<\/p>)/, '$1'+desc+'$2');
-      if(year)  inn = inn.replace(/(<span>)\d{4}(<\/span>)/, '$1'+year+'$2');
-      if(views) inn = inn.replace(/(<span class="views">)[^<]+(<\/span>)/, '$1'+views+'$2');
+      if (tag)   inn = inn.replace(/(class="tag curly">)[^<]+(<\/span>)/, '$1'+tag+'$2');
+      if (cl)    inn = inn.replace(/(<h4 class="h4">)[^<]+(<\/h4>)/, '$1'+cl+'$2');
+      if (desc)  inn = inn.replace(/(<p class="desc">)[^<]+(<\/p>)/, '$1'+desc+'$2');
+      if (year)  inn = inn.replace(/(<span>)\d{4}(<\/span>)/, '$1'+year+'$2');
+      if (views) inn = inn.replace(/(<span class="views">)[^<]+(<\/span>)/, '$1'+views+'$2');
       h = h.replace(m[1], inn);
     });
   }
 
-  if(section === 'services') {
+  if (section === 'services') {
     var ni=0;
     h = h.replace(/(<div class="svc">[\s\S]*?<h3>)([^<]+)(<\/h3>)/g, function(_,pre,name,post){ var v=getVal('svc-'+ni+'-name')||name; ni++; return pre+v+post; });
     var pi=0;
@@ -614,22 +556,23 @@ function applyChanges(html, section) {
     h = h.replace(/(<div class="term">[\s\S]*?<b>)([^<]+)(<\/b>)/g, function(_,pre,t,post){ var v=getVal('svc-'+ti+'-term')||t; ti++; return pre+v+post; });
   }
 
-  if(section === 'faq') {
+  if (section === 'faq') {
     var qi=0;
     h = h.replace(/(<button class="faq-q">)\s*([^<\n]+)/g, function(_,pre,q){ var v=getVal('faq-'+qi+'-q')||q.trim(); qi++; return pre+v+'\n          '; });
     var ai=0;
     h = h.replace(/(<div class="inner">)([\s\S]*?)(<\/div>)/g, function(_,pre,a,post){ var v=getVal('faq-'+ai+'-a')||a.trim(); ai++; return pre+v+post; });
   }
 
-  if(section === 'contacts') {
+  if (section === 'contacts') {
     var email=getVal('contact-email'), tg=getVal('contact-tg'), phone=getVal('contact-phone');
-    if(email){ h=h.replace(/mailto:[^"\\]+/g,'mailto:'+email); h=h.replace(/info@tola\.video/g,email); }
-    if(phone) h=h.replace(/\+7[^<]{5,25}(?=<\/b>)/g, phone);
+    if (email){ h=h.replace(/mailto:[^"\\]+/g,'mailto:'+email); h=h.replace(/info@tola\.video/g,email); }
+    if (tg)   { h=h.replace(/(@tola_video)/g,'@'+tg); }
+    if (phone) h=h.replace(/\+7[^<]{5,25}(?=<\/b>)/g, phone);
   }
 
-  if(section === 'footer') {
+  if (section === 'footer') {
     var copy = getVal('footer-copy');
-    if(copy) h = h.replace(/©[^<]+/, copy);
+    if (copy) h = h.replace(/©[^<]+/, copy);
   }
 
   return h;
@@ -652,7 +595,7 @@ function toast(msg, type) {
   t.className = 'toast ' + (type||'info');
   t.textContent = msg;
   bar.appendChild(t);
-  setTimeout(function() { t.style.opacity='0'; t.style.transition='opacity .4s'; setTimeout(function(){ t.remove(); }, 400); }, 5000);
+  setTimeout(function(){ t.style.opacity='0'; t.style.transition='opacity .4s'; setTimeout(function(){ t.remove(); }, 400); }, 5000);
 }
 </script>
 </body>
